@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.splitCVerticalLevel1 = new System.Windows.Forms.SplitContainer();
+            this.button1 = new System.Windows.Forms.Button();
             this.lEquation = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.splitCVerticalLevel1)).BeginInit();
             this.splitCVerticalLevel1.Panel1.SuspendLayout();
@@ -45,10 +46,21 @@
             // 
             // splitCVerticalLevel1.Panel1
             // 
+            this.splitCVerticalLevel1.Panel1.Controls.Add(this.button1);
             this.splitCVerticalLevel1.Panel1.Controls.Add(this.lEquation);
             this.splitCVerticalLevel1.Size = new System.Drawing.Size(1264, 681);
             this.splitCVerticalLevel1.SplitterDistance = 266;
             this.splitCVerticalLevel1.TabIndex = 0;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(12, 59);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(211, 23);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "Open 3D graph window";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // lEquation
             // 
@@ -82,5 +94,6 @@
 
         private SplitContainer splitCVerticalLevel1;
         private Label lEquation;
+        private Button button1;
     }
 }
