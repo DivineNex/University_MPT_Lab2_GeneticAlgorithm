@@ -31,7 +31,10 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
         public GraphWindow(int width, int height, string title)
             : base(GameWindowSettings.Default, new NativeWindowSettings()
-            { Size = (width, height), Title = title })
+            { 
+                Size = (width, height), 
+                Title = title
+            })
         {
             shader = new Shader(@"..\..\..\shader.vert", @"..\..\..\shader.frag");
         }

@@ -9,7 +9,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
         private void formMain_Load(object sender, EventArgs e)
         {
-            splitCVerticalLevel1.SplitterDistance = splitCVerticalLevel1.Width / 8;
+            
         }
 
         private void button1_Click(object sender, EventArgs e)
