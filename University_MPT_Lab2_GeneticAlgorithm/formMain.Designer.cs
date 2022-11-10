@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.splitCVerticalLevel1 = new System.Windows.Forms.SplitContainer();
-            this.tbLog = new System.Windows.Forms.TextBox();
+            this.rtbLog = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
@@ -44,6 +44,7 @@
             this.nudXMin = new System.Windows.Forms.NumericUpDown();
             this.lXmin = new System.Windows.Forms.Label();
             this.lEquation = new System.Windows.Forms.Label();
+            this.bClearLog = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitCVerticalLevel1)).BeginInit();
             this.splitCVerticalLevel1.Panel1.SuspendLayout();
             this.splitCVerticalLevel1.SuspendLayout();
@@ -65,7 +66,8 @@
             // 
             // splitCVerticalLevel1.Panel1
             // 
-            this.splitCVerticalLevel1.Panel1.Controls.Add(this.tbLog);
+            this.splitCVerticalLevel1.Panel1.Controls.Add(this.bClearLog);
+            this.splitCVerticalLevel1.Panel1.Controls.Add(this.rtbLog);
             this.splitCVerticalLevel1.Panel1.Controls.Add(this.progressBar1);
             this.splitCVerticalLevel1.Panel1.Controls.Add(this.button1);
             this.splitCVerticalLevel1.Panel1.Controls.Add(this.button2);
@@ -84,15 +86,14 @@
             this.splitCVerticalLevel1.SplitterDistance = 236;
             this.splitCVerticalLevel1.TabIndex = 0;
             // 
-            // tbLog
+            // rtbLog
             // 
-            this.tbLog.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.tbLog.Location = new System.Drawing.Point(12, 318);
-            this.tbLog.Multiline = true;
-            this.tbLog.Name = "tbLog";
-            this.tbLog.ReadOnly = true;
-            this.tbLog.Size = new System.Drawing.Size(211, 350);
-            this.tbLog.TabIndex = 14;
+            this.rtbLog.Location = new System.Drawing.Point(12, 318);
+            this.rtbLog.Name = "rtbLog";
+            this.rtbLog.Size = new System.Drawing.Size(211, 309);
+            this.rtbLog.TabIndex = 14;
+            this.rtbLog.Text = "";
+            this.rtbLog.TextChanged += new System.EventHandler(this.rtbLog_TextChanged);
             // 
             // progressBar1
             // 
@@ -103,7 +104,6 @@
             // 
             // button1
             // 
-            this.button1.Enabled = false;
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.button1.Location = new System.Drawing.Point(12, 277);
             this.button1.Name = "button1";
@@ -122,6 +122,7 @@
             this.button2.TabIndex = 12;
             this.button2.Text = "Calculate";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // nudStep
             // 
@@ -238,6 +239,17 @@
             this.lEquation.TabIndex = 0;
             this.lEquation.Text = "z(x, y) = sin(x) + cos(y)";
             // 
+            // bClearLog
+            // 
+            this.bClearLog.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.bClearLog.Location = new System.Drawing.Point(12, 633);
+            this.bClearLog.Name = "bClearLog";
+            this.bClearLog.Size = new System.Drawing.Size(211, 35);
+            this.bClearLog.TabIndex = 15;
+            this.bClearLog.Text = "Clear log";
+            this.bClearLog.UseVisualStyleBackColor = true;
+            this.bClearLog.Click += new System.EventHandler(this.bClearLog_Click);
+            // 
             // formMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -277,6 +289,7 @@
         private Label lXmin;
         private Button button2;
         private ProgressBar progressBar1;
-        private TextBox tbLog;
+        private RichTextBox rtbLog;
+        private Button bClearLog;
     }
 }
