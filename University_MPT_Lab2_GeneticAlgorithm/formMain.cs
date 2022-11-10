@@ -19,5 +19,21 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 graph.Run();
             }
         }
+
+        private List<Point3D> Calculate(int xMin, int xMax, int yMin, int yMax, int step)
+        {
+            List<Point3D> result = new List<Point3D>();
+
+            for (int x = xMin; x <= xMax; x += step)
+            {
+                for (int y = yMin; y <= yMax; y += step)
+                {
+                    double z = Math.Sin(x) + Math.Cos(y);
+                    result.Add(new Point3D(x, y, z));
+                }
+            }
+
+            return result;
+        }
     }
 }
