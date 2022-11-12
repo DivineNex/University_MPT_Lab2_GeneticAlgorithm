@@ -24,25 +24,11 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         private Vector2 _lastPos;
         private double _time;
 
-        private float[] _vertices = {
-             // positions
-             -0.5f, 0.0f, -0.5f, //top left
-             0.5f, 0.0f, -0.5f, //top right
-             0.5f, 0.0f, 0.5f, //bottom right
-             -0.5f, 0.0f, 0.5f, //bottom left
-             // colors
-             1.0f, 0.0f, 0.0f,
-             0.0f, 1.0f, 0.0f,
-             0.0f, 0.0f, 1.0f,
-             0.0f, 1.0f, 0.0f,
-        };
+        private float[] _vertices;
 
-        private uint[] _indices = {
-            0, 1, 2,
-            0, 2, 3
-        };
+        private uint[] _indices;
 
-        public GraphWindow(int width, int height, string title)
+        public GraphWindow(int width, int height, string title, List<Point3D> points)
             : base(GameWindowSettings.Default, new NativeWindowSettings()
             { 
                 Size = (width, height), 
@@ -52,6 +38,57 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             _shader = new Shader(@"..\..\..\shader.vert", @"..\..\..\shader.frag");
             _camera = new Camera(new Vector3(0, 1, 2), Size.X / (float)Size.Y);
             CursorState = CursorState.Grabbed;
+
+            var normalizedPoints = NormalizePoints(points);
+            PointsToVertices(normalizedPoints, out _vertices);
+        }
+
+        private List<Point3D> NormalizePoints(List<Point3D> points)
+        {
+            double maxX = points[0].X;
+            double minX = points[0].X;
+            double maxY = points[0].Y;
+            double minY = points[0].Y;
+            double maxZ = points[0].Z;
+            double minZ = points[0].Z;
+
+            for (int i = 0; i < points.Count; i++)
+            {
+                if (points[i].X > maxX) maxX = points[i].X;
+                if (points[i].X < minX) minX = points[i].X;
+                if (points[i].Y > maxY) maxY = points[i].Y;
+                if (points[i].Y < minY) minY = points[i].Y;
+                if (points[i].Z > maxZ) maxZ = points[i].Z;
+                if (points[i].Z < minZ) minZ = points[i].Z;
+            }
+
+            var result = new List<Point3D>();
+
+            for (int i = 0; i < points.Count; i++)
+            {
+                result.Add(new Point3D (InterpolateNumber(minX, -1.0, maxX, 1.0, points[i].X),
+                                        InterpolateNumber(minY, -1.0, maxY, 1.0, points[i].Y),
+                                        InterpolateNumber(minZ, -1.0, maxZ, 1.0, points[i].Z)));
+            }
+
+            return result;
+        }
+
+        private void PointsToVertices(List<Point3D> points, out float[] vertices)
+        {
+            vertices = new float[points.Count * 3];
+
+            for (int i = 0; i < points.Count; i++)
+            {
+                vertices[i] = (float)points[i].X;
+                vertices[i+1] = (float)points[i].Y;
+                vertices[i+2] = (float)points[i].Z;
+            }
+        }
+
+        private double InterpolateNumber(double x1, double y1, double x2, double y2, double x3)
+        {
+            return y2 + ((y1-y2)/(x1-x2)) * (x3 - x2);
         }
 
         protected override void OnLoad()

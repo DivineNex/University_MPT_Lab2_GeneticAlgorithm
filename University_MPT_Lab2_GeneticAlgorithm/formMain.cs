@@ -22,9 +22,12 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
         private void button1_Click(object sender, EventArgs e)
         {
-            using (GraphWindow graph = new GraphWindow(800, 600, "3D graph"))
+            if (_points != null)
             {
-                graph.Run();
+                using (GraphWindow graph = new GraphWindow(800, 600, "3D graph", _points))
+                {
+                    graph.Run();
+                }
             }
         }
 
