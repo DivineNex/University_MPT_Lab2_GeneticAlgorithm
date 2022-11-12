@@ -15,7 +15,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
     {
         private int _vertexBufferObject;
         private int _vertexArrayObject;
-        //private int _elementBufferObject;
+        private int _elementBufferObject;
 
         private Shader _shader;
         private Camera _camera;
@@ -25,18 +25,21 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
         private float[] _vertices = {
              // positions
-             0.5f, -0.5f, 0.0f,  
-            -0.5f, -0.5f, 0.0f,    
-             0.0f,  0.5f, 0.0f,
-             //colors
+             -0.5f, 0.0f, -0.5f, //top left
+             0.5f, 0.0f, -0.5f, //top right
+             0.5f, 0.0f, 0.5f, //bottom right
+             -0.5f, 0.0f, 0.5f, //bottom left
+             // colors
              1.0f, 0.0f, 0.0f,
              0.0f, 1.0f, 0.0f,
-             0.0f, 0.0f, 1.0f
+             0.0f, 0.0f, 1.0f,
+             0.0f, 1.0f, 0.0f,
         };
 
-        //private uint[] indices = {
-        //    1, 2, 3
-        //};
+        private uint[] _indices = {
+            0, 1, 2,
+            0, 2, 3
+        };
 
         public GraphWindow(int width, int height, string title)
             : base(GameWindowSettings.Default, new NativeWindowSettings()
@@ -46,7 +49,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             })
         {
             _shader = new Shader(@"..\..\..\shader.vert", @"..\..\..\shader.frag");
-            _camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
+            _camera = new Camera(new Vector3(0, 1, 2), Size.X / (float)Size.Y);
             CursorState = CursorState.Grabbed;
         }
 
@@ -62,11 +65,16 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             //биндим буфер VBO и задаем его размер
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-            GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.DynamicDraw);
 
             //генерируем буфер VAO и биндим его
             _vertexArrayObject = GL.GenVertexArray();
             GL.BindVertexArray(_vertexArrayObject);
+
+            //генерируем EBO и биндим его
+            _elementBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.DynamicDraw);
 
             _shader.Use();
 
@@ -96,7 +104,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             GL.BindVertexArray(_vertexArrayObject);
 
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+            GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
             SwapBuffers();
         }
