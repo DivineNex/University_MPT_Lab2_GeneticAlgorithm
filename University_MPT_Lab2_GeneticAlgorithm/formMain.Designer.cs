@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.splitCVerticalLevel1 = new System.Windows.Forms.SplitContainer();
+            this.bClearLog = new System.Windows.Forms.Button();
             this.rtbLog = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.button1 = new System.Windows.Forms.Button();
@@ -44,7 +45,6 @@
             this.nudXMin = new System.Windows.Forms.NumericUpDown();
             this.lXmin = new System.Windows.Forms.Label();
             this.lEquation = new System.Windows.Forms.Label();
-            this.bClearLog = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitCVerticalLevel1)).BeginInit();
             this.splitCVerticalLevel1.Panel1.SuspendLayout();
             this.splitCVerticalLevel1.SuspendLayout();
@@ -85,6 +85,17 @@
             this.splitCVerticalLevel1.Size = new System.Drawing.Size(1264, 681);
             this.splitCVerticalLevel1.SplitterDistance = 236;
             this.splitCVerticalLevel1.TabIndex = 0;
+            // 
+            // bClearLog
+            // 
+            this.bClearLog.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.bClearLog.Location = new System.Drawing.Point(12, 633);
+            this.bClearLog.Name = "bClearLog";
+            this.bClearLog.Size = new System.Drawing.Size(211, 35);
+            this.bClearLog.TabIndex = 15;
+            this.bClearLog.Text = "Clear log";
+            this.bClearLog.UseVisualStyleBackColor = true;
+            this.bClearLog.Click += new System.EventHandler(this.bClearLog_Click);
             // 
             // rtbLog
             // 
@@ -239,23 +250,13 @@
             this.lEquation.TabIndex = 0;
             this.lEquation.Text = "z(x, y) = sin(x) + cos(y)";
             // 
-            // bClearLog
-            // 
-            this.bClearLog.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.bClearLog.Location = new System.Drawing.Point(12, 633);
-            this.bClearLog.Name = "bClearLog";
-            this.bClearLog.Size = new System.Drawing.Size(211, 35);
-            this.bClearLog.TabIndex = 15;
-            this.bClearLog.Text = "Clear log";
-            this.bClearLog.UseVisualStyleBackColor = true;
-            this.bClearLog.Click += new System.EventHandler(this.bClearLog_Click);
-            // 
             // formMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1264, 681);
             this.Controls.Add(this.splitCVerticalLevel1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "formMain";
             this.Text = "Genetic Algorithm";
             this.Load += new System.EventHandler(this.formMain_Load);
