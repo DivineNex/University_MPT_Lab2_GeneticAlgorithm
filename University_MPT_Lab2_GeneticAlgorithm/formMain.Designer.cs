@@ -137,7 +137,13 @@
             // 
             // nudStep
             // 
+            this.nudStep.DecimalPlaces = 1;
             this.nudStep.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.nudStep.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
             this.nudStep.Location = new System.Drawing.Point(103, 175);
             this.nudStep.Name = "nudStep";
             this.nudStep.Size = new System.Drawing.Size(120, 26);
@@ -146,7 +152,7 @@
             1,
             0,
             0,
-            0});
+            65536});
             // 
             // lStep
             // 
@@ -162,6 +168,11 @@
             // 
             this.nudYMax.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.nudYMax.Location = new System.Drawing.Point(103, 143);
+            this.nudYMax.Maximum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            0});
             this.nudYMax.Name = "nudYMax";
             this.nudYMax.Size = new System.Drawing.Size(120, 26);
             this.nudYMax.TabIndex = 9;
@@ -203,6 +214,11 @@
             // 
             this.nudXMax.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.nudXMax.Location = new System.Drawing.Point(103, 79);
+            this.nudXMax.Maximum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            0});
             this.nudXMax.Name = "nudXMax";
             this.nudXMax.Size = new System.Drawing.Size(120, 26);
             this.nudXMax.TabIndex = 5;

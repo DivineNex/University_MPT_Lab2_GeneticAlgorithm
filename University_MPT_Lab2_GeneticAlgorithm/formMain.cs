@@ -29,6 +29,10 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                     graph.Run();
                 }
             }
+            else
+            {
+                Log("Points not created!");
+            }
         }
 
         private List<Point3D> Calculate(double xMin, double xMax, 

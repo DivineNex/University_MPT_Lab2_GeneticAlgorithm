@@ -25,7 +25,6 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         private double _time;
 
         private float[] _vertices;
-
         private uint[] _indices;
 
         public GraphWindow(int width, int height, string title, List<Point3D> points)
@@ -52,7 +51,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             double maxZ = points[0].Z;
             double minZ = points[0].Z;
 
-            for (int i = 0; i < points.Count; i++)
+            for (int i = 1; i < points.Count; i++)
             {
                 if (points[i].X > maxX) maxX = points[i].X;
                 if (points[i].X < minX) minX = points[i].X;
@@ -76,14 +75,17 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
         private void PointsToVertices(List<Point3D> points, out float[] vertices)
         {
-            vertices = new float[points.Count * 3];
+            var verticesList = new List<float>();
+            verticesList.Capacity = points.Count * 3;
 
             for (int i = 0; i < points.Count; i++)
             {
-                vertices[i] = (float)points[i].X;
-                vertices[i+1] = (float)points[i].Y;
-                vertices[i+2] = (float)points[i].Z;
+                verticesList.Add((float)points[i].X);
+                verticesList.Add((float)points[i].Y);
+                verticesList.Add((float)points[i].Z);
             }
+
+            vertices = verticesList.ToArray();
         }
 
         private double InterpolateNumber(double x1, double y1, double x2, double y2, double x3)
@@ -110,9 +112,9 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             GL.BindVertexArray(_vertexArrayObject);
 
             //генерируем EBO и биндим его
-            _elementBufferObject = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StreamDraw);
+            //_elementBufferObject = GL.GenBuffer();
+            //GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
+            //GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StreamDraw);
 
             _shader.Use();
 
@@ -122,9 +124,9 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
 
             //создаем указатель на цвет вершин и включаем атрибут
-            var colorLocation = _shader.GetAttribLocation("aColor");
-            GL.EnableVertexAttribArray(colorLocation);
-            GL.VertexAttribPointer(colorLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 3 * 3 * sizeof(float));
+        //    var colorLocation = _shader.GetAttribLocation("aColor");
+        //    GL.EnableVertexAttribArray(colorLocation);
+        //    GL.VertexAttribPointer(colorLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 3 * 3 * sizeof(float));
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -144,8 +146,11 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             GL.BindVertexArray(_vertexArrayObject);
 
-            GL.PointSize(10f);
-            GL.DrawElements(PrimitiveType.Points, _indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.PointSize(2f);
+
+            GL.DrawArrays(PrimitiveType.Points, 0, _vertices.Length/3);
+
+            //GL.DrawElements(PrimitiveType.Points, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
             SwapBuffers();
         }
@@ -162,7 +167,16 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             KeyboardState input = KeyboardState;
 
             if (input.IsKeyPressed(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Escape))
+            {
                 Close();
+            }
+            if (input.IsKeyPressed(OpenTK.Windowing.GraphicsLibraryFramework.Keys.F))
+            {
+                if (WindowState == WindowState.Normal)
+                    this.WindowState = WindowState.Fullscreen;
+                else if (WindowState == WindowState.Fullscreen)
+                    this.WindowState = WindowState.Normal;
+            }
 
             const float cameraSpeed = 1.5f;
             const float sensitivity = 0.2f;
@@ -171,7 +185,6 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             {
                 _camera.Position += _camera.Front * cameraSpeed * (float)e.Time; // Forward
             }
-
             if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.S))
             {
                 _camera.Position -= _camera.Front * cameraSpeed * (float)e.Time; // Backwards
