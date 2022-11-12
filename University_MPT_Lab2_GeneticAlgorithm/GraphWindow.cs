@@ -22,6 +22,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
         private bool _firstMove = true;
         private Vector2 _lastPos;
+        private double _time;
 
         private float[] _vertices = {
              // positions
@@ -65,7 +66,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             //биндим буфер VBO и задаем его размер
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-            GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.DynamicDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StreamDraw);
 
             //генерируем буфер VAO и биндим его
             _vertexArrayObject = GL.GenVertexArray();
@@ -74,7 +75,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             //генерируем EBO и биндим его
             _elementBufferObject = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.DynamicDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StreamDraw);
 
             _shader.Use();
 
@@ -93,18 +94,21 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         {
             base.OnRenderFrame(e);
 
+            _time += 4.0 * e.Time;
+
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             _shader.Use();
 
-            var model = Matrix4.Identity;
+            var model = Matrix4.Identity * Matrix4.CreateRotationY((float)MathHelper.DegreesToRadians(_time));
             _shader.SetMatrix4("model", model);
             _shader.SetMatrix4("view", _camera.GetViewMatrix());
             _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
 
             GL.BindVertexArray(_vertexArrayObject);
 
-            GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.PointSize(10f);
+            GL.DrawElements(PrimitiveType.Points, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
             SwapBuffers();
         }
