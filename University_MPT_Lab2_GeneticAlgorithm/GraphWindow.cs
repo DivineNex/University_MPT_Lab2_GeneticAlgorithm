@@ -61,14 +61,12 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 if (points[i].Z < minZ) minZ = points[i].Z;
             }
 
+            var coeff = new List<double> { maxX, maxY, maxZ }.Max();
+
             var result = new List<Point3D>();
 
             for (int i = 0; i < points.Count; i++)
-            {
-                result.Add(new Point3D (InterpolateNumber(minX, -1.0, maxX, 1.0, points[i].X),
-                                        InterpolateNumber(minY, -1.0, maxY, 1.0, points[i].Y),
-                                        InterpolateNumber(minZ, -1.0, maxZ, 1.0, points[i].Z)));
-            }
+                result.Add(new Point3D(points[i].X/coeff, points[i].Y/coeff, points[i].Z/coeff));
 
             return result;
         }
@@ -80,17 +78,13 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             for (int i = 0; i < points.Count; i++)
             {
+                //Y и Z поменяны местами специально, для поворота всей поверхности
                 verticesList.Add((float)points[i].X);
-                verticesList.Add((float)points[i].Y);
                 verticesList.Add((float)points[i].Z);
+                verticesList.Add((float)points[i].Y);
             }
 
             vertices = verticesList.ToArray();
-        }
-
-        private double InterpolateNumber(double x1, double y1, double x2, double y2, double x3)
-        {
-            return y2 + ((y1-y2)/(x1-x2)) * (x3 - x2);
         }
 
         protected override void OnLoad()
@@ -121,12 +115,12 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             //создаем указатель на позицию вершин и включаем атрибут
             var vertexLocation = _shader.GetAttribLocation("aPosition");
             GL.EnableVertexAttribArray(vertexLocation);
-            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, true, 3 * sizeof(float), 0);
 
-            //создаем указатель на цвет вершин и включаем атрибут
-        //    var colorLocation = _shader.GetAttribLocation("aColor");
-        //    GL.EnableVertexAttribArray(colorLocation);
-        //    GL.VertexAttribPointer(colorLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 3 * 3 * sizeof(float));
+            ////создаем указатель на цвет вершин и включаем атрибут
+            //var colorLocation = _shader.GetAttribLocation("aColor");
+            //GL.EnableVertexAttribArray(colorLocation);
+            //GL.VertexAttribPointer(colorLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -146,9 +140,9 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             GL.BindVertexArray(_vertexArrayObject);
 
-            GL.PointSize(2f);
+            GL.PointSize(3f);
 
-            GL.DrawArrays(PrimitiveType.Points, 0, _vertices.Length/3);
+            GL.DrawArrays(PrimitiveType.Points, 0, _vertices.Length / 3);
 
             //GL.DrawElements(PrimitiveType.Points, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
