@@ -23,9 +23,11 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         private bool _firstMove = true;
         private Vector2 _lastPos;
         private double _time;
+        private float minNormalizedZ;
+        private float maxNormalizedZ;
 
         private float[] _vertices;
-        private uint[] _indices;
+        //private uint[] _indices;
 
         public GraphWindow(int width, int height, string title, List<Point3D> points)
             : base(GameWindowSettings.Default, new NativeWindowSettings()
@@ -68,20 +70,32 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             for (int i = 0; i < points.Count; i++)
                 result.Add(new Point3D(points[i].X/coeff, points[i].Y/coeff, points[i].Z/coeff));
 
+            maxNormalizedZ = (float)(maxZ / coeff);
+            minNormalizedZ = (float)(minZ / coeff);
             return result;
         }
 
         private void PointsToVertices(List<Point3D> points, out float[] vertices)
         {
             var verticesList = new List<float>();
-            verticesList.Capacity = points.Count * 3;
+            verticesList.Capacity = points.Count * 6;
 
             for (int i = 0; i < points.Count; i++)
             {
                 //Y и Z поменяны местами специально, для поворота всей поверхности
+                //position
                 verticesList.Add((float)points[i].X);
                 verticesList.Add((float)points[i].Z);
                 verticesList.Add((float)points[i].Y);
+
+                //color (color will be interpolated by Z value, so we will have something like height-map)
+                float colorValue = InterpolateFloatNumber(minNormalizedZ, 0.0f, maxNormalizedZ, 0.7f, (float)points[i].Z);
+                //verticesList.Add(colorValue);
+                //verticesList.Add(0.3f);       //nice red-green theme
+                //verticesList.Add(0.3f);
+                verticesList.Add(colorValue);
+                verticesList.Add(0.0f);
+                verticesList.Add(0.5f);
             }
 
             vertices = verticesList.ToArray();
@@ -92,7 +106,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             base.OnLoad();
 
             //задаем цвет очистки
-            GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            GL.ClearColor(0.4f, 0.5f, 0.5f, 1.0f);
 
             //генерируем буфер VBO
             _vertexBufferObject = GL.GenBuffer();
@@ -115,12 +129,12 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             //создаем указатель на позицию вершин и включаем атрибут
             var vertexLocation = _shader.GetAttribLocation("aPosition");
             GL.EnableVertexAttribArray(vertexLocation);
-            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, true, 3 * sizeof(float), 0);
+            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 0);
 
-            ////создаем указатель на цвет вершин и включаем атрибут
-            //var colorLocation = _shader.GetAttribLocation("aColor");
-            //GL.EnableVertexAttribArray(colorLocation);
-            //GL.VertexAttribPointer(colorLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+            //создаем указатель на цвет вершин и включаем атрибут
+            var colorLocation = _shader.GetAttribLocation("aColor");
+            GL.EnableVertexAttribArray(colorLocation);
+            GL.VertexAttribPointer(colorLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 3 * sizeof(float));
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -142,7 +156,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             GL.PointSize(3f);
 
-            GL.DrawArrays(PrimitiveType.Points, 0, _vertices.Length / 3);
+            GL.DrawArrays(PrimitiveType.Points, 0, _vertices.Length / 6);
 
             //GL.DrawElements(PrimitiveType.Points, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
@@ -239,6 +253,11 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             base.OnUnload();
 
             CursorState = CursorState.Normal;
+        }
+
+        private float InterpolateFloatNumber(float x1, float y1, float x2, float y2, float x3)
+        {
+            return y2 + ((y1 - y2) / (x1 - x2)) * (x3 - x2);
         }
     }
 }

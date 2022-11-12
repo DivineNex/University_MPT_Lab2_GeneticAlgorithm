@@ -24,7 +24,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         {
             if (_points != null)
             {
-                using (GraphWindow graph = new GraphWindow(800, 600, "3D graph", _points))
+                using (GraphWindow graph = new GraphWindow(1280, 720, "3D graph", _points))
                 {
                     graph.Run();
                 }
@@ -45,6 +45,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 for (double y = yMin; y <= yMax; y += step)
                 {
                     double z = Math.Sin(x) + Math.Cos(y);
+                    //double z = Math.Sin(10*(Math.Pow(x,2) + Math.Pow(y,2)))/10;
                     result.Add(new Point3D(x, y, z));
                 }
             }

@@ -143,7 +143,7 @@
             1,
             0,
             0,
-            65536});
+            131072});
             this.nudStep.Location = new System.Drawing.Point(103, 175);
             this.nudStep.Name = "nudStep";
             this.nudStep.Size = new System.Drawing.Size(120, 26);
@@ -173,11 +173,16 @@
             0,
             0,
             0});
+            this.nudYMax.Minimum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            -2147483648});
             this.nudYMax.Name = "nudYMax";
             this.nudYMax.Size = new System.Drawing.Size(120, 26);
             this.nudYMax.TabIndex = 9;
             this.nudYMax.Value = new decimal(new int[] {
-            9,
+            10,
             0,
             0,
             0});
@@ -196,9 +201,24 @@
             // 
             this.nudYMin.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.nudYMin.Location = new System.Drawing.Point(103, 111);
+            this.nudYMin.Maximum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            0});
+            this.nudYMin.Minimum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            -2147483648});
             this.nudYMin.Name = "nudYMin";
             this.nudYMin.Size = new System.Drawing.Size(120, 26);
             this.nudYMin.TabIndex = 7;
+            this.nudYMin.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            -2147483648});
             // 
             // lYmin
             // 
@@ -219,11 +239,16 @@
             0,
             0,
             0});
+            this.nudXMax.Minimum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            -2147483648});
             this.nudXMax.Name = "nudXMax";
             this.nudXMax.Size = new System.Drawing.Size(120, 26);
             this.nudXMax.TabIndex = 5;
             this.nudXMax.Value = new decimal(new int[] {
-            9,
+            10,
             0,
             0,
             0});
@@ -242,9 +267,24 @@
             // 
             this.nudXMin.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.nudXMin.Location = new System.Drawing.Point(103, 47);
+            this.nudXMin.Maximum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            0});
+            this.nudXMin.Minimum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            -2147483648});
             this.nudXMin.Name = "nudXMin";
             this.nudXMin.Size = new System.Drawing.Size(120, 26);
             this.nudXMin.TabIndex = 3;
+            this.nudXMin.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            -2147483648});
             // 
             // lXmin
             // 
