@@ -27,14 +27,10 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         private float maxNormalizedZ;
 
         private float[] _vertices;
-        //private uint[] _indices;
+        private uint[] _indices;
 
-        public GraphWindow(int width, int height, string title, List<Point3D> points)
-            : base(GameWindowSettings.Default, new NativeWindowSettings()
-            { 
-                Size = (width, height), 
-                Title = title
-            })
+        public GraphWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, List<Point3D> points, int surfaceLenght, int surfaceWidth)
+            : base(gameWindowSettings, nativeWindowSettings)
         {
             _shader = new Shader(@"..\..\..\shader.vert", @"..\..\..\shader.frag");
             _camera = new Camera(new Vector3(0, 1, 2), Size.X / (float)Size.Y);
@@ -42,6 +38,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             var normalizedPoints = NormalizePoints(points);
             PointsToVertices(normalizedPoints, out _vertices);
+            GenerateIndices(surfaceLenght, surfaceWidth);
         }
 
         private List<Point3D> NormalizePoints(List<Point3D> points)
@@ -90,15 +87,38 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
                 //color (color will be interpolated by Z value, so we will have something like height-map)
                 float colorValue = InterpolateFloatNumber(minNormalizedZ, 0.0f, maxNormalizedZ, 0.7f, (float)points[i].Z);
-                //verticesList.Add(colorValue);
-                //verticesList.Add(0.3f);       //nice red-green theme
-                //verticesList.Add(0.3f);
                 verticesList.Add(colorValue);
-                verticesList.Add(0.0f);
-                verticesList.Add(0.5f);
+                verticesList.Add(0.3f);       //nice red-green theme
+                verticesList.Add(0.3f);
+                //verticesList.Add(colorValue);
+                //verticesList.Add(0.0f);
+                //verticesList.Add(0.5f);
+            }
+            vertices = verticesList.ToArray();
+        }
+
+        private void GenerateIndices(int surfaceLenght, int surfaceWidth)
+        {
+            List<uint> indices = new List<uint>();
+            indices.Capacity = (surfaceWidth - 1) * (surfaceWidth - 1) * 6;
+
+            int pointCount = _vertices.Length / 2 / 3;
+
+            for (int i = 0; i < pointCount- surfaceWidth; i++)
+            {
+                if ((i + 1) % surfaceWidth != 0)
+                {
+                    indices.Add((uint)i);
+                    indices.Add((uint)i + 1);
+                    indices.Add((uint)(i + surfaceWidth));
+
+                    indices.Add((uint)i + 1);
+                    indices.Add((uint)(i + surfaceWidth + 1));
+                    indices.Add((uint)(i + surfaceWidth));
+                }
             }
 
-            vertices = verticesList.ToArray();
+            _indices = indices.ToArray();
         }
 
         protected override void OnLoad()
@@ -120,9 +140,9 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             GL.BindVertexArray(_vertexArrayObject);
 
             //генерируем EBO и биндим его
-            //_elementBufferObject = GL.GenBuffer();
-            //GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
-            //GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StreamDraw);
+            _elementBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StreamDraw);
 
             _shader.Use();
 
@@ -143,7 +163,10 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             _time += 4.0 * e.Time;
 
-            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+
+            GL.Enable(EnableCap.DepthTest);
+            GL.DepthFunc(DepthFunction.Lequal);
 
             _shader.Use();
 
@@ -156,9 +179,11 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             GL.PointSize(3f);
 
-            GL.DrawArrays(PrimitiveType.Points, 0, _vertices.Length / 6);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            //GL.DrawArrays(PrimitiveType.Points, 0, _vertices.Length / 6);
 
-            //GL.DrawElements(PrimitiveType.Points, _indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
             SwapBuffers();
         }

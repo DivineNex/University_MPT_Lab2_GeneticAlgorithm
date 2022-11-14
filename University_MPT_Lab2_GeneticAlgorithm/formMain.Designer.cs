@@ -137,7 +137,7 @@
             // 
             // nudStep
             // 
-            this.nudStep.DecimalPlaces = 1;
+            this.nudStep.DecimalPlaces = 2;
             this.nudStep.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.nudStep.Increment = new decimal(new int[] {
             1,
@@ -182,7 +182,7 @@
             this.nudYMax.Size = new System.Drawing.Size(120, 26);
             this.nudYMax.TabIndex = 9;
             this.nudYMax.Value = new decimal(new int[] {
-            10,
+            20,
             0,
             0,
             0});
@@ -215,7 +215,7 @@
             this.nudYMin.Size = new System.Drawing.Size(120, 26);
             this.nudYMin.TabIndex = 7;
             this.nudYMin.Value = new decimal(new int[] {
-            10,
+            20,
             0,
             0,
             -2147483648});
@@ -248,7 +248,7 @@
             this.nudXMax.Size = new System.Drawing.Size(120, 26);
             this.nudXMax.TabIndex = 5;
             this.nudXMax.Value = new decimal(new int[] {
-            10,
+            20,
             0,
             0,
             0});
@@ -281,7 +281,7 @@
             this.nudXMin.Size = new System.Drawing.Size(120, 26);
             this.nudXMin.TabIndex = 3;
             this.nudXMin.Value = new decimal(new int[] {
-            10,
+            20,
             0,
             0,
             -2147483648});

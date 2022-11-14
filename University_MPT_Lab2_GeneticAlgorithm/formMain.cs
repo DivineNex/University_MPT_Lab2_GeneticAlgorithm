@@ -1,3 +1,4 @@
+using OpenTK.Windowing.Desktop;
 using System.Windows.Forms;
 using University_MPT_Lab2_GeneticAlgorithm.Extensions;
 
@@ -9,6 +10,8 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
         private Color _lastLoggerColor = Color.White;
         private List<Point3D> _points;
+        private int _surfaceLength;
+        private int _surfaceWidth;
 
         public formMain()
         {
@@ -24,7 +27,14 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         {
             if (_points != null)
             {
-                using (GraphWindow graph = new GraphWindow(1280, 720, "3D graph", _points))
+                NativeWindowSettings nativeWindowSettings = new NativeWindowSettings()
+                {
+                    Size = new OpenTK.Mathematics.Vector2i(1280, 720),
+                    Title = "3D graph"
+                };
+
+                using (GraphWindow graph = new GraphWindow(GameWindowSettings.Default, 
+                    nativeWindowSettings, _points, _surfaceLength, _surfaceWidth))
                 {
                     graph.Run();
                 }
@@ -40,15 +50,18 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         {
             List<Point3D> result = new List<Point3D>();
 
-            for (double x = xMin; x <= xMax; x += step)
+            for (double x = xMin; Math.Round(x, 2) <= xMax; x += step)
             {
-                for (double y = yMin; y <= yMax; y += step)
+                for (double y = yMin; Math.Round(y, 2) <= yMax; y += step)
                 {
                     double z = Math.Sin(x) + Math.Cos(y);
                     //double z = Math.Sin(10*(Math.Pow(x,2) + Math.Pow(y,2)))/10;
                     result.Add(new Point3D(x, y, z));
                 }
             }
+
+            _surfaceLength = (int)((xMax - xMin) / step + 1);
+            _surfaceWidth = (int)((yMax - yMin) / step + 1);
 
             messageHandler?.Invoke($"{result.Count} points have been calculated");
             return result;
