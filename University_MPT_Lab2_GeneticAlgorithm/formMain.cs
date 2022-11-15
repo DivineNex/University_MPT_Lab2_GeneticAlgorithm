@@ -30,7 +30,8 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 NativeWindowSettings nativeWindowSettings = new NativeWindowSettings()
                 {
                     Size = new OpenTK.Mathematics.Vector2i(1280, 720),
-                    Title = "3D graph"
+                    Title = "3D graph",
+                    APIVersion = new Version(3, 3)
                 };
 
                 using (GraphWindow graph = new GraphWindow(GameWindowSettings.Default, 

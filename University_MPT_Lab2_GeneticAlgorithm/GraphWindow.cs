@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using ImGuiNET;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
 
 namespace University_MPT_Lab2_GeneticAlgorithm
 {
@@ -19,6 +21,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
         private Shader _shader;
         private Camera _camera;
+        private ImGuiController _guiController;
 
         private bool _firstMove = true;
         private Vector2 _lastPos;
@@ -34,7 +37,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         {
             _shader = new Shader(@"..\..\..\shader.vert", @"..\..\..\shader.frag");
             _camera = new Camera(new Vector3(0, 1, 2), Size.X / (float)Size.Y);
-            CursorState = CursorState.Grabbed;
+            //CursorState = CursorState.Grabbed;
 
             var normalizedPoints = NormalizePoints(points);
             PointsToVertices(normalizedPoints, out _vertices);
@@ -87,12 +90,12 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
                 //color (color will be interpolated by Z value, so we will have something like height-map)
                 float colorValue = InterpolateFloatNumber(minNormalizedZ, 0.0f, maxNormalizedZ, 0.7f, (float)points[i].Z);
-                verticesList.Add(colorValue);
-                verticesList.Add(0.3f);       //nice red-green theme
-                verticesList.Add(0.3f);
                 //verticesList.Add(colorValue);
-                //verticesList.Add(0.0f);
-                //verticesList.Add(0.5f);
+                //verticesList.Add(0.3f);       //nice red-green theme
+                //verticesList.Add(0.3f);
+                verticesList.Add(colorValue);
+                verticesList.Add(0.0f);
+                verticesList.Add(0.5f);
             }
             vertices = verticesList.ToArray();
         }
@@ -124,6 +127,9 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         protected override void OnLoad()
         {
             base.OnLoad();
+
+            Title += ": OpenGL Version: " + GL.GetString(StringName.Version);
+            _guiController = new ImGuiController(ClientSize.X, ClientSize.Y);
 
             //задаем цвет очистки
             GL.ClearColor(0.4f, 0.5f, 0.5f, 1.0f);
@@ -161,6 +167,8 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         {
             base.OnRenderFrame(e);
 
+            _guiController.Update(this, (float)e.Time);
+
             _time += 4.0 * e.Time;
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
@@ -185,6 +193,10 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
+            ImGui.ShowDemoWindow();
+            _guiController.Render();
+            ImGuiController.CheckGLError("End of frame");
+
             SwapBuffers();
         }
 
@@ -199,11 +211,11 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             KeyboardState input = KeyboardState;
 
-            if (input.IsKeyPressed(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Escape))
+            if (input.IsKeyPressed(Keys.Escape))
             {
                 Close();
             }
-            if (input.IsKeyPressed(OpenTK.Windowing.GraphicsLibraryFramework.Keys.F))
+            if (input.IsKeyPressed(Keys.F))
             {
                 if (WindowState == WindowState.Normal)
                     this.WindowState = WindowState.Fullscreen;
@@ -214,27 +226,27 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             const float cameraSpeed = 1.5f;
             const float sensitivity = 0.2f;
 
-            if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.W))
+            if (input.IsKeyDown(Keys.W))
             {
                 _camera.Position += _camera.Front * cameraSpeed * (float)e.Time; // Forward
             }
-            if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.S))
+            if (input.IsKeyDown(Keys.S))
             {
                 _camera.Position -= _camera.Front * cameraSpeed * (float)e.Time; // Backwards
             }
-            if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.A))
+            if (input.IsKeyDown(Keys.A))
             {
                 _camera.Position -= _camera.Right * cameraSpeed * (float)e.Time; // Left
             }
-            if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.D))
+            if (input.IsKeyDown(Keys.D))
             {
                 _camera.Position += _camera.Right * cameraSpeed * (float)e.Time; // Right
             }
-            if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Space))
+            if (input.IsKeyDown(Keys.Space))
             {
                 _camera.Position += _camera.Up * cameraSpeed * (float)e.Time; // Up
             }
-            if (input.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.LeftShift))
+            if (input.IsKeyDown(Keys.LeftShift))
             {
                 _camera.Position -= _camera.Up * cameraSpeed * (float)e.Time; // Down
             }
@@ -262,13 +274,16 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             base.OnMouseWheel(e);
 
             _camera.Fov -= e.OffsetY;
+
+            _guiController.MouseScroll(e.Offset);
         }
 
         protected override void OnResize(ResizeEventArgs e)
         {
             base.OnResize(e);
 
-            GL.Viewport(0, 0, e.Width, e.Height);
+            GL.Viewport(0, 0, ClientSize.X, ClientSize.Y);
+            _guiController.WindowResized(ClientSize.X, ClientSize.Y);
 
             _camera.AspectRatio = Size.X / (float)Size.Y;
         }
@@ -277,12 +292,19 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         {
             base.OnUnload();
 
-            CursorState = CursorState.Normal;
+            //CursorState = CursorState.Normal;
         }
 
         private float InterpolateFloatNumber(float x1, float y1, float x2, float y2, float x3)
         {
             return y2 + ((y1 - y2) / (x1 - x2)) * (x3 - x2);
+        }
+
+        protected override void OnTextInput(TextInputEventArgs e)
+        {
+            base.OnTextInput(e);
+
+            _guiController.PressChar((char)e.Unicode);
         }
     }
 }
