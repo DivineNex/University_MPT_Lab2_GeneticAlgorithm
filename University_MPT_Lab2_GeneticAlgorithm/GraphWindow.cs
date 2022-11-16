@@ -32,12 +32,14 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         private float[] _vertices;
         private uint[] _indices;
 
+        private ControlMode _mode = ControlMode.Setup;
+
         public GraphWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, List<Point3D> points, int surfaceLenght, int surfaceWidth)
             : base(gameWindowSettings, nativeWindowSettings)
         {
             _shader = new Shader(@"..\..\..\shader.vert", @"..\..\..\shader.frag");
-            _camera = new Camera(new Vector3(0, 1, 2), Size.X / (float)Size.Y);
-            //CursorState = CursorState.Grabbed;
+            _camera = new Camera(new Vector3(0, 0.7f, 2), Size.X / (float)Size.Y);
+            _camera.Pitch = -24; // start camera pitch (rotation by x axis)
 
             var normalizedPoints = NormalizePoints(points);
             PointsToVertices(normalizedPoints, out _vertices);
@@ -205,17 +207,15 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         {
             base.OnUpdateFrame(e);
 
-            if (!IsFocused) // Check to see if the window is focused
-            {
+            if (!IsFocused)
                 return;
-            }
 
             KeyboardState input = KeyboardState;
 
             if (input.IsKeyPressed(Keys.F4))
-            {
                 Close();
-            }
+            if (input.IsKeyPressed(Keys.F1))
+                SwitchControlMode();
             if (input.IsKeyPressed(Keys.F2))
             {
                 if (WindowState == WindowState.Normal)
@@ -224,49 +224,40 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                     this.WindowState = WindowState.Normal;
             }
 
-            const float cameraSpeed = 1.5f;
-            const float sensitivity = 0.2f;
+            if (_mode == ControlMode.View)
+            {
+                const float cameraSpeed = 1.5f;
+                const float sensitivity = 0.2f;
 
-            if (input.IsKeyDown(Keys.W))
-            {
-                _camera.Position += _camera.Front * cameraSpeed * (float)e.Time; // Forward
-            }
-            if (input.IsKeyDown(Keys.S))
-            {
-                _camera.Position -= _camera.Front * cameraSpeed * (float)e.Time; // Backwards
-            }
-            if (input.IsKeyDown(Keys.A))
-            {
-                _camera.Position -= _camera.Right * cameraSpeed * (float)e.Time; // Left
-            }
-            if (input.IsKeyDown(Keys.D))
-            {
-                _camera.Position += _camera.Right * cameraSpeed * (float)e.Time; // Right
-            }
-            if (input.IsKeyDown(Keys.Space))
-            {
-                _camera.Position += _camera.Up * cameraSpeed * (float)e.Time; // Up
-            }
-            if (input.IsKeyDown(Keys.LeftShift))
-            {
-                _camera.Position -= _camera.Up * cameraSpeed * (float)e.Time; // Down
-            }
+                if (input.IsKeyDown(Keys.W))
+                    _camera.Position += _camera.Front * cameraSpeed * (float)e.Time; // Forward
+                if (input.IsKeyDown(Keys.S))
+                    _camera.Position -= _camera.Front * cameraSpeed * (float)e.Time; // Backwards
+                if (input.IsKeyDown(Keys.A))
+                    _camera.Position -= _camera.Right * cameraSpeed * (float)e.Time; // Left
+                if (input.IsKeyDown(Keys.D))
+                    _camera.Position += _camera.Right * cameraSpeed * (float)e.Time; // Right
+                if (input.IsKeyDown(Keys.Space))
+                    _camera.Position += _camera.Up * cameraSpeed * (float)e.Time; // Up
+                if (input.IsKeyDown(Keys.LeftShift))
+                    _camera.Position -= _camera.Up * cameraSpeed * (float)e.Time; // Down
 
-            var mouse = MouseState;
+                var mouse = MouseState;
 
-            if (_firstMove)
-            {
-                _lastPos = new Vector2(mouse.X, mouse.Y);
-                _firstMove = false;
-            }
-            else
-            {
-                var deltaX = mouse.X - _lastPos.X;
-                var deltaY = mouse.Y - _lastPos.Y;
-                _lastPos = new Vector2(mouse.X, mouse.Y);
+                if (_firstMove)
+                {
+                    _lastPos = new Vector2(mouse.X, mouse.Y);
+                    _firstMove = false;
+                }
+                else
+                {
+                    var deltaX = mouse.X - _lastPos.X;
+                    var deltaY = mouse.Y - _lastPos.Y;
+                    _lastPos = new Vector2(mouse.X, mouse.Y);
 
-                _camera.Yaw += deltaX * sensitivity;
-                _camera.Pitch -= deltaY * sensitivity;
+                    _camera.Yaw += deltaX * sensitivity;
+                    _camera.Pitch -= deltaY * sensitivity;
+                }
             }
         }
 
@@ -274,9 +265,10 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         {
             base.OnMouseWheel(e);
 
-            _camera.Fov -= e.OffsetY;
-
-            _guiController.MouseScroll(e.Offset);
+            if (_mode == ControlMode.Setup)
+                _guiController.MouseScroll(e.Offset);
+            else if (_mode == ControlMode.View)
+                _camera.Fov -= e.OffsetY;
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -293,7 +285,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         {
             base.OnUnload();
 
-            //CursorState = CursorState.Normal;
+            CursorState = CursorState.Normal;
         }
 
         private float InterpolateFloatNumber(float x1, float y1, float x2, float y2, float x3)
@@ -306,6 +298,20 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             base.OnTextInput(e);
 
             _guiController.PressChar((char)e.Unicode);
+        }
+
+        private void SwitchControlMode()
+        {
+            if (_mode == ControlMode.Setup)
+            {
+                _mode = ControlMode.View;
+                CursorState = CursorState.Grabbed;
+            }
+            else if (_mode == ControlMode.View)
+            {
+                _mode = ControlMode.Setup;
+                CursorState = CursorState.Normal;
+            }
         }
 
         private void ShowImGui()

@@ -39,6 +39,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 {
                     graph.Run();
                 }
+                Close();
             }
             else
             {
