@@ -193,7 +193,8 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
-            ImGui.ShowDemoWindow();
+            ShowImGui();
+
             _guiController.Render();
             ImGuiController.CheckGLError("End of frame");
 
@@ -211,11 +212,11 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             KeyboardState input = KeyboardState;
 
-            if (input.IsKeyPressed(Keys.Escape))
+            if (input.IsKeyPressed(Keys.F4))
             {
                 Close();
             }
-            if (input.IsKeyPressed(Keys.F))
+            if (input.IsKeyPressed(Keys.F2))
             {
                 if (WindowState == WindowState.Normal)
                     this.WindowState = WindowState.Fullscreen;
@@ -305,6 +306,74 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             base.OnTextInput(e);
 
             _guiController.PressChar((char)e.Unicode);
+        }
+
+        private void ShowImGui()
+        {
+            ImGui.SetNextWindowPos(new System.Numerics.Vector2(3, 3), ImGuiCond.Once);
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(450, 650), ImGuiCond.Once);
+
+            ImGui.Begin("Genetic Algorithm");
+
+            ImGui.PushItemWidth(ImGui.GetFontSize() * -12);
+
+            if (ImGui.CollapsingHeader("Information"))
+            {
+                ImGui.Text("About this program:");
+                ImGui.Text("With this program, you can build a 3D surface by function,\n" +
+                    "adjust the ranges, step, color gradient of the graph.");
+                ImGui.Text("Using a genetic algorithm, you can find the minimum\n" +
+                    "or maximum of a function on given ranges.");
+                ImGui.Separator();
+
+                ImGui.Text("GUI guide:");
+                ImGui.BulletText("The \"Information\" tab contains basic information,\n" +
+                    "as well as control keys");
+                ImGui.BulletText("The \"Function parameters\" tab contains settings\n" +
+                    "for the ranges and step of the function");
+                ImGui.BulletText("The \"Genetic Algorithm\" tab contains settings\n" +
+                    "and control of the genetic algorithm");
+                ImGui.BulletText("The \"Settings\" tab contains general settings and\n" +
+                    "3D graph style settings");
+                ImGui.Separator();
+
+                ImGui.Text("Keys guide:");
+                ImGui.BulletText("F1  - switch between setup mode and view mode");
+                ImGui.BulletText("F2  - toggle fullscreen mode");
+                ImGui.BulletText("F4  - close program");
+                ImGui.BulletText("In View mode W, A, S, D, LShift, Space - camera movement");
+                ImGui.BulletText("In View mode Mouse Wheel - change camera FOV");
+                ImGui.Separator();
+
+                if (ImGui.TreeNode("User guide"))
+                {
+                    ImGui.ShowUserGuide();
+                }
+            }
+
+            if (ImGui.CollapsingHeader("Function parameters"))
+            {
+
+            }
+
+            if (ImGui.CollapsingHeader("Genetic Algorithm"))
+            {
+
+            }
+
+            if (ImGui.CollapsingHeader("Settings"))
+            {
+                if (ImGui.TreeNode("General"))
+                {
+
+                }
+                if (ImGui.TreeNode("Style"))
+                {
+
+                }
+            }
+
+            ImGui.End();
         }
     }
 }
