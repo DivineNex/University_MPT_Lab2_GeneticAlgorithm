@@ -42,6 +42,15 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         private float[] _vertices;
         private uint[] _indices;
 
+        private static bool no_titlebar = false;
+        private static bool no_scrollbar = false;
+        private static bool no_move = false;
+        private static bool no_resize = false;
+        private static bool no_collapse = false;
+        private static bool no_nav = false;
+        private static bool no_background_in_view_mode = true;
+        private static bool no_bring_to_front = false;
+
         private ControlMode _mode = ControlMode.Setup;
 
         public GraphWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
@@ -369,10 +378,20 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
         private void ShowImGui()
         {
+            ImGuiWindowFlags window_flags = 0;
+            if (no_titlebar) window_flags |= ImGuiWindowFlags.NoTitleBar;
+            if (no_scrollbar) window_flags |= ImGuiWindowFlags.NoScrollbar;
+            if (no_move) window_flags |= ImGuiWindowFlags.NoMove;
+            if (no_resize) window_flags |= ImGuiWindowFlags.NoResize;
+            if (no_collapse) window_flags |= ImGuiWindowFlags.NoCollapse;
+            if (no_nav) window_flags |= ImGuiWindowFlags.NoNav;
+            if (no_background_in_view_mode && _mode == ControlMode.View) window_flags |= ImGuiWindowFlags.NoBackground;
+            if (no_bring_to_front) window_flags |= ImGuiWindowFlags.NoBringToFrontOnFocus;
+
             ImGui.SetNextWindowPos(new System.Numerics.Vector2(3, 3), ImGuiCond.Once);
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(450, 650), ImGuiCond.Once);
 
-            ImGui.Begin("Genetic Algorithm");
+            ImGui.Begin("Genetic Algorithm", window_flags);
 
             ImGui.PushItemWidth(ImGui.GetFontSize() * -12);
 
@@ -422,9 +441,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 ImGui.InputFloat("Step", ref _step, 0.01f);
 
                 if (ImGui.Button("Rebuild"))
-                {
                     Rebuild();
-                }
             }
 
             if (ImGui.CollapsingHeader("Genetic algorithm"))
@@ -436,7 +453,18 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             {
                 if (ImGui.TreeNode("General"))
                 {
-
+                    ImGui.Text("GUI window settings");
+                    if (ImGui.BeginTable("split", 3))
+                    {
+                        ImGui.TableNextColumn(); ImGui.Checkbox("No titlebar", ref no_titlebar);
+                        ImGui.TableNextColumn(); ImGui.Checkbox("No scrollbar", ref no_scrollbar);
+                        ImGui.TableNextColumn(); ImGui.Checkbox("No move", ref no_move);
+                        ImGui.TableNextColumn(); ImGui.Checkbox("No resize", ref no_resize);
+                        ImGui.TableNextColumn(); ImGui.Checkbox("No collapse", ref no_collapse);
+                        ImGui.TableNextColumn(); ImGui.Checkbox("No nav", ref no_nav);
+                        ImGui.EndTable();
+                    }
+                    ImGui.Checkbox("Hide GUI background in View mode", ref no_background_in_view_mode);
                 }
                 if (ImGui.TreeNode("Style"))
                 {
