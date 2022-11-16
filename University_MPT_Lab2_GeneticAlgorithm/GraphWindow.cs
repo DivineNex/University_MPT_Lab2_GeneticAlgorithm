@@ -15,6 +15,12 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 {
     internal class GraphWindow : GameWindow
     {
+        private int _minX;
+        private int _maxX;
+        private int _minY;
+        private int _maxY;
+        private float _step;
+
         private int _vertexBufferObject;
         private int _vertexArrayObject;
         private int _elementBufferObject;
@@ -130,11 +136,13 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         {
             base.OnLoad();
 
+            InitValues();
+
             Title += ": OpenGL Version: " + GL.GetString(StringName.Version);
             _guiController = new ImGuiController(ClientSize.X, ClientSize.Y);
 
             //задаем цвет очистки
-            GL.ClearColor(0.4f, 0.5f, 0.5f, 1.0f);
+            GL.ClearColor(0.5f, 0.7f, 0.7f, 1.0f);
 
             //генерируем буфер VBO
             _vertexBufferObject = GL.GenBuffer();
@@ -196,6 +204,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
             ShowImGui();
+            //ImGui.ShowDemoWindow();
 
             _guiController.Render();
             ImGuiController.CheckGLError("End of frame");
@@ -255,8 +264,11 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                     var deltaY = mouse.Y - _lastPos.Y;
                     _lastPos = new Vector2(mouse.X, mouse.Y);
 
-                    _camera.Yaw += deltaX * sensitivity;
-                    _camera.Pitch -= deltaY * sensitivity;
+                    if (Math.Abs(deltaX) < 100 && Math.Abs(deltaY) < 100)
+                    {
+                        _camera.Yaw += deltaX * sensitivity;
+                        _camera.Pitch -= deltaY * sensitivity;
+                    }
                 }
             }
         }
@@ -314,6 +326,15 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             }
         }
 
+        private void InitValues()
+        {
+            _minX = -10;
+            _maxX = 10;
+            _minY = -10;
+            _maxY = 10;
+            _step = 0.01f;
+        }
+
         private void ShowImGui()
         {
             ImGui.SetNextWindowPos(new System.Numerics.Vector2(3, 3), ImGuiCond.Once);
@@ -359,10 +380,22 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             if (ImGui.CollapsingHeader("Function parameters"))
             {
+                ImGui.TextColored(new System.Numerics.Vector4(0.3f, 0.7f, 0.5f, 1.0f), "z(x,y) = sin(x)+cos(y)");
+                ImGui.Separator();
 
+                ImGui.InputInt("Min X", ref _minX, 1);
+                ImGui.InputInt("Max X", ref _maxX, 1);
+                ImGui.InputInt("Min Y", ref _minY, 1);
+                ImGui.InputInt("Max Y", ref _maxY, 1);
+                ImGui.InputFloat("Step", ref _step, 0.01f);
+
+                if (ImGui.Button("Rebuild"))
+                {
+                    //Rebuild
+                }
             }
 
-            if (ImGui.CollapsingHeader("Genetic Algorithm"))
+            if (ImGui.CollapsingHeader("Genetic algorithm"))
             {
 
             }
