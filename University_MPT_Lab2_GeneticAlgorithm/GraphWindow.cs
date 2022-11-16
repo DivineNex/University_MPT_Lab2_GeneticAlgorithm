@@ -7,6 +7,7 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,6 +51,9 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         private static bool no_nav = false;
         private static bool no_background_in_view_mode = true;
         private static bool no_bring_to_front = false;
+
+        private static System.Numerics.Vector4 _minimumGradientColor = new System.Numerics.Vector4(0.0f, 0.0f, 0.5f, 1.0f);
+        private static System.Numerics.Vector4 _maximumGradientColor = new System.Numerics.Vector4(0.7f, 0.0f, 0.5f, 1.0f);
 
         private ControlMode _mode = ControlMode.Setup;
 
@@ -105,14 +109,15 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 verticesList.Add((float)points[i].Z);
                 verticesList.Add((float)points[i].Y);
 
-                //color (color will be interpolated by Z value, so we will have something like height-map)
-                float colorValue = InterpolateFloatNumber(minNormalizedZ, 0.0f, maxNormalizedZ, 0.7f, (float)points[i].Z);
-                //verticesList.Add(colorValue);
-                //verticesList.Add(0.3f);       //nice red-green theme
-                //verticesList.Add(0.3f);
-                verticesList.Add(colorValue);
-                verticesList.Add(0.0f);
-                verticesList.Add(0.5f);
+                verticesList.Add(InterpolateFloatNumber(minNormalizedZ, 
+                    _minimumGradientColor.X, maxNormalizedZ, 
+                    _maximumGradientColor.X, (float)points[i].Z)); //r
+                verticesList.Add(InterpolateFloatNumber(minNormalizedZ, 
+                    _minimumGradientColor.Y, maxNormalizedZ, 
+                    _maximumGradientColor.Y, (float)points[i].Z)); //g
+                verticesList.Add(InterpolateFloatNumber(minNormalizedZ, 
+                    _minimumGradientColor.Z, maxNormalizedZ, 
+                    _maximumGradientColor.Z, (float)points[i].Z)); //b
             }
             vertices = verticesList.ToArray();
         }
@@ -468,7 +473,26 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 }
                 if (ImGui.TreeNode("Style"))
                 {
+                    float w = (ImGui.GetContentRegionAvail().X) * 0.50f;
+                    if (ImGui.BeginTable("split1", 2))
+                    {
+                        ImGui.TableNextColumn();
+                        ImGui.SetNextItemWidth(w);
+                        ImGui.Text("Minimum gradient color");
+                        ImGui.SetNextItemWidth(w);
+                        ImGui.ColorPicker4("", ref _minimumGradientColor, ImGuiColorEditFlags.PickerHueWheel | ImGuiColorEditFlags.NoSidePreview | ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoAlpha);
 
+                        ImGui.TableNextColumn();
+                        ImGui.SetNextItemWidth(w);
+                        ImGui.Text("Maximum gradient color");
+                        ImGui.SetNextItemWidth(w);
+                        ImGui.ColorPicker4("", ref _maximumGradientColor, ImGuiColorEditFlags.PickerHueWheel | ImGuiColorEditFlags.NoSidePreview | ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoAlpha);
+
+                        ImGui.EndTable();
+                    }
+
+                    if (ImGui.Button("Rebuild"))
+                        Rebuild();
                 }
             }
 
