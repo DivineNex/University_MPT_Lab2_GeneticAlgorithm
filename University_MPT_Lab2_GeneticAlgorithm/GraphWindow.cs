@@ -306,14 +306,19 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             _maxX = 10;
             _minY = -10;
             _maxY = 10;
-            _step = 0.01f;
+            _step = 0.1f;
             _vertices = new float[0];
             _indices = new uint[0];
+            _points = new List<Point3D>(100000);
         }
 
         private void Rebuild()
         {
-            CalculatePoints(_minX, _maxX, _minY, _maxY, _step);
+            _points = new List<Point3D>(100000);
+            _vertices = new float[0];
+            _indices = new uint[0];
+
+            CalculatePoints(_minX, _maxX, _minY, _maxY, Math.Round(_step, 2));
             var normalizedPoints = NormalizePoints(_points);
             PointsToVertices(normalizedPoints, out _vertices);
             GenerateIndices(_surfaceLength, _surfaceWidth);
@@ -348,12 +353,9 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         private void CalculatePoints(double xMin, double xMax,
             double yMin, double yMax, double step)
         {
-            int capacity = (int)(((xMax - xMin) / step + 1) * ((yMax - yMin) / step + 1));
-            _points = new List<Point3D>(capacity);
-
-            for (double x = xMin; Math.Round(x, 2) <= xMax; x += step)
+            for (double x = xMin; x <= xMax; x += step)
             {
-                for (double y = yMin; Math.Round(y, 2) <= yMax; y += step)
+                for (double y = yMin; y <= yMax; y += step)
                 {
                     double z = Math.Sin(x) + Math.Cos(y);
                     //double z = Math.Sin(10*(Math.Pow(x,2) + Math.Pow(y,2)))/10;
