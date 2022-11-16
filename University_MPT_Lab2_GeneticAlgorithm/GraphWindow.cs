@@ -58,11 +58,13 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
         private eControlMode _mode = eControlMode.Setup;
         private static int _renderPrimitive = 1; // 0 - points, 1 - triangles
-        private static bool _metrics_show = true;
-        private float[] _last_frames_ms = new float[20];
-        private byte _counter_for_average_ms = 0;
-        private float _last_average_ms = 0f;
+        private static bool _metricsShow = true;
+        private float[] _lastFramesMs = new float[20];
+        private byte _counterForAverageMs = 0;
+        private float _lastAverageMs = 0f;
         private Stopwatch _frameStopwatch = new Stopwatch();
+        private static bool _rotationByY = true;
+        private static bool _showGui = true;
 
         public GraphWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
@@ -176,7 +178,8 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             _guiController.Update(this, (float)e.Time);
 
-            _time += 4.0 * e.Time;
+            if (_rotationByY)
+                _time += 4.0 * e.Time;
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 
@@ -186,6 +189,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             _shader.Use();
 
             var model = Matrix4.Identity * Matrix4.CreateRotationY((float)MathHelper.DegreesToRadians(_time));
+
             _shader.SetMatrix4("model", model);
             _shader.SetMatrix4("view", _camera.GetViewMatrix());
             _shader.SetMatrix4("projection", _camera.GetProjectionMatrix());
@@ -210,7 +214,8 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                     break;
             }
 
-            ShowImGui();
+            if (_showGui)
+                ShowImGui();
             //ImGui.ShowDemoWindow();
 
             _guiController.Render();
@@ -219,13 +224,13 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             SwapBuffers();
 
             _frameStopwatch.Stop();
-            if (_counter_for_average_ms == 20)
+            if (_counterForAverageMs == 20)
             {
-                _counter_for_average_ms = 0;
-                _last_average_ms = _last_frames_ms.Sum() / 20;
+                _counterForAverageMs = 0;
+                _lastAverageMs = _lastFramesMs.Sum() / 20;
             }
-            _last_frames_ms[_counter_for_average_ms] = _frameStopwatch.ElapsedTicks / 10000;
-            _counter_for_average_ms++;
+            _lastFramesMs[_counterForAverageMs] = _frameStopwatch.ElapsedTicks / 10000;
+            _counterForAverageMs++;
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e)
@@ -248,6 +253,8 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 else if (WindowState == WindowState.Fullscreen)
                     this.WindowState = WindowState.Normal;
             }
+            if (input.IsKeyPressed(Keys.F3))
+                _showGui = !_showGui;
 
             if (_mode == eControlMode.View)
             {
@@ -422,7 +429,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             if (no_bring_to_front) window_flags |= ImGuiWindowFlags.NoBringToFrontOnFocus;
 
             ImGui.SetNextWindowPos(new System.Numerics.Vector2(3, 3), ImGuiCond.Once);
-            ImGui.SetNextWindowSize(new System.Numerics.Vector2(450, 650), ImGuiCond.Once);
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(450, ClientSize.Y - 6), ImGuiCond.Once);
 
             ImGui.Begin("Genetic Algorithm", window_flags);
 
@@ -451,6 +458,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 ImGui.Text("Keys guide:");
                 ImGui.BulletText("F1  - switch between setup mode and view mode");
                 ImGui.BulletText("F2  - toggle fullscreen mode");
+                ImGui.BulletText("F3  - show/hide GUI");
                 ImGui.BulletText("F4  - close program");
                 ImGui.BulletText("In View mode W, A, S, D, LShift, Space - camera movement");
                 ImGui.BulletText("In View mode Mouse Wheel - change camera FOV");
@@ -497,8 +505,10 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                         ImGui.TableNextColumn(); ImGui.Checkbox("No nav", ref no_nav);
                         ImGui.EndTable();
                     }
+                    ImGui.Separator();
                     ImGui.Checkbox("Hide GUI background in View mode", ref no_background_in_view_mode);
-                    ImGui.Checkbox("Show metrics window", ref _metrics_show);
+                    ImGui.Checkbox("Show metrics window", ref _metricsShow);
+                    ImGui.Checkbox("Rotation by Y axis", ref _rotationByY);
 
                     ImGui.TreePop();
                 }
@@ -538,7 +548,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             ImGui.End();
 
-            if (_metrics_show)
+            if (_metricsShow)
             {
                 ImGui.SetNextWindowPos(new System.Numerics.Vector2(ClientSize.X-263, 3), ImGuiCond.Always);
                 ImGui.SetNextWindowSize(new System.Numerics.Vector2(260, 170), ImGuiCond.Once);
@@ -552,8 +562,8 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 ImGui.Text($"Average - for the last 20 frames");
                 ImGui.Separator();
 
-                ImGui.Text($"Average ms/frame = {_last_average_ms}");
-                ImGui.Text($"Average FPS = {1000 / _last_average_ms}");
+                ImGui.Text($"Average ms/frame = {_lastAverageMs}");
+                ImGui.Text($"Average FPS = {1000 / _lastAverageMs}");
                 ImGui.Separator();
                 ImGui.Text($"Vertices = {_vertices.Length / 2}");
                 ImGui.Text($"Indices = {_indices.Length}");
