@@ -7,6 +7,7 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -57,6 +58,11 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
         private eControlMode _mode = eControlMode.Setup;
         private static int _renderPrimitive = 1; // 0 - points, 1 - triangles
+        private static bool _metrics_show = true;
+        private float[] _last_frames_ms = new float[20];
+        private byte _counter_for_average_ms = 0;
+        private float _last_average_ms = 0f;
+        private Stopwatch _frameStopwatch = new Stopwatch();
 
         public GraphWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
@@ -164,6 +170,8 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            _frameStopwatch.Restart();
+
             base.OnRenderFrame(e);
 
             _guiController.Update(this, (float)e.Time);
@@ -203,12 +211,21 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             }
 
             ShowImGui();
-            ImGui.ShowDemoWindow();
+            //ImGui.ShowDemoWindow();
 
             _guiController.Render();
             ImGuiController.CheckGLError("End of frame");
 
             SwapBuffers();
+
+            _frameStopwatch.Stop();
+            if (_counter_for_average_ms == 20)
+            {
+                _counter_for_average_ms = 0;
+                _last_average_ms = _last_frames_ms.Sum() / 20;
+            }
+            _last_frames_ms[_counter_for_average_ms] = _frameStopwatch.ElapsedTicks / 10000;
+            _counter_for_average_ms++;
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e)
@@ -481,6 +498,9 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                         ImGui.EndTable();
                     }
                     ImGui.Checkbox("Hide GUI background in View mode", ref no_background_in_view_mode);
+                    ImGui.Checkbox("Show metrics window", ref _metrics_show);
+
+                    ImGui.TreePop();
                 }
                 if (ImGui.TreeNode("Style"))
                 {
@@ -511,10 +531,37 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                     ImGui.RadioButton("Points", ref _renderPrimitive, 0); 
                     ImGui.SameLine();
                     ImGui.RadioButton("Triangles", ref _renderPrimitive, 1);
+
+                    ImGui.TreePop();
                 }
             }
 
             ImGui.End();
+
+            if (_metrics_show)
+            {
+                ImGui.SetNextWindowPos(new System.Numerics.Vector2(ClientSize.X-263, 3), ImGuiCond.Always);
+                ImGui.SetNextWindowSize(new System.Numerics.Vector2(260, 170), ImGuiCond.Once);
+
+                var metrics_window_flags = ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize;
+                if (no_background_in_view_mode && _mode == eControlMode.View)
+                    metrics_window_flags |= ImGuiWindowFlags.NoBackground;
+
+                ImGui.Begin("Metrics", metrics_window_flags);
+
+                ImGui.Text($"Average - for the last 20 frames");
+                ImGui.Separator();
+
+                ImGui.Text($"Average ms/frame = {_last_average_ms}");
+                ImGui.Text($"Average FPS = {1000 / _last_average_ms}");
+                ImGui.Separator();
+                ImGui.Text($"Vertices = {_vertices.Length / 2}");
+                ImGui.Text($"Indices = {_indices.Length}");
+                ImGui.Text($"Points = {_vertices.Length / 2 / 3}");
+                ImGui.Text($"Triangles = {_indices.Length / 3}");
+
+                ImGui.End();
+            }
         }
     }
 }
