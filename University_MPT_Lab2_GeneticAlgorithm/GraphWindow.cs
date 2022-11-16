@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using Microsoft.VisualBasic.Logging;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -20,6 +21,9 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         private int _minY;
         private int _maxY;
         private float _step;
+        private List<Point3D> _points;
+        private int _surfaceLength;
+        private int _surfaceWidth;
 
         private int _vertexBufferObject;
         private int _vertexArrayObject;
@@ -40,16 +44,12 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
         private ControlMode _mode = ControlMode.Setup;
 
-        public GraphWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, List<Point3D> points, int surfaceLenght, int surfaceWidth)
+        public GraphWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
         {
             _shader = new Shader(@"..\..\..\shader.vert", @"..\..\..\shader.frag");
             _camera = new Camera(new Vector3(0, 0.7f, 2), Size.X / (float)Size.Y);
             _camera.Pitch = -24; // start camera pitch (rotation by x axis)
-
-            var normalizedPoints = NormalizePoints(points);
-            PointsToVertices(normalizedPoints, out _vertices);
-            GenerateIndices(surfaceLenght, surfaceWidth);
         }
 
         private List<Point3D> NormalizePoints(List<Point3D> points)
@@ -144,33 +144,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             //задаем цвет очистки
             GL.ClearColor(0.5f, 0.7f, 0.7f, 1.0f);
 
-            //генерируем буфер VBO
-            _vertexBufferObject = GL.GenBuffer();
-
-            //биндим буфер VBO и задаем его размер
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-            GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StreamDraw);
-
-            //генерируем буфер VAO и биндим его
-            _vertexArrayObject = GL.GenVertexArray();
-            GL.BindVertexArray(_vertexArrayObject);
-
-            //генерируем EBO и биндим его
-            _elementBufferObject = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StreamDraw);
-
             _shader.Use();
-
-            //создаем указатель на позицию вершин и включаем атрибут
-            var vertexLocation = _shader.GetAttribLocation("aPosition");
-            GL.EnableVertexAttribArray(vertexLocation);
-            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 0);
-
-            //создаем указатель на цвет вершин и включаем атрибут
-            var colorLocation = _shader.GetAttribLocation("aColor");
-            GL.EnableVertexAttribArray(colorLocation);
-            GL.VertexAttribPointer(colorLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 3 * sizeof(float));
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -333,6 +307,62 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             _minY = -10;
             _maxY = 10;
             _step = 0.01f;
+            _vertices = new float[0];
+            _indices = new uint[0];
+        }
+
+        private void Rebuild()
+        {
+            CalculatePoints(_minX, _maxX, _minY, _maxY, _step);
+            var normalizedPoints = NormalizePoints(_points);
+            PointsToVertices(normalizedPoints, out _vertices);
+            GenerateIndices(_surfaceLength, _surfaceWidth);
+
+            //генерируем буфер VBO
+            _vertexBufferObject = GL.GenBuffer();
+
+            //биндим буфер VBO и задаем его размер
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StreamDraw);
+
+            //генерируем буфер VAO и биндим его
+            _vertexArrayObject = GL.GenVertexArray();
+            GL.BindVertexArray(_vertexArrayObject);
+
+            //генерируем EBO и биндим его
+            _elementBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StreamDraw);
+
+            //создаем указатель на позицию вершин и включаем атрибут
+            var vertexLocation = _shader.GetAttribLocation("aPosition");
+            GL.EnableVertexAttribArray(vertexLocation);
+            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 0);
+
+            //создаем указатель на цвет вершин и включаем атрибут
+            var colorLocation = _shader.GetAttribLocation("aColor");
+            GL.EnableVertexAttribArray(colorLocation);
+            GL.VertexAttribPointer(colorLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 3 * sizeof(float));
+        }
+
+        private void CalculatePoints(double xMin, double xMax,
+            double yMin, double yMax, double step)
+        {
+            int capacity = (int)(((xMax - xMin) / step + 1) * ((yMax - yMin) / step + 1));
+            _points = new List<Point3D>(capacity);
+
+            for (double x = xMin; Math.Round(x, 2) <= xMax; x += step)
+            {
+                for (double y = yMin; Math.Round(y, 2) <= yMax; y += step)
+                {
+                    double z = Math.Sin(x) + Math.Cos(y);
+                    //double z = Math.Sin(10*(Math.Pow(x,2) + Math.Pow(y,2)))/10;
+                    _points.Add(new Point3D(x, y, z));
+                }
+            }
+
+            _surfaceLength = (int)((xMax - xMin) / step + 1);
+            _surfaceWidth = (int)((yMax - yMin) / step + 1);
         }
 
         private void ShowImGui()
@@ -391,7 +421,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
                 if (ImGui.Button("Rebuild"))
                 {
-                    //Rebuild
+                    Rebuild();
                 }
             }
 
