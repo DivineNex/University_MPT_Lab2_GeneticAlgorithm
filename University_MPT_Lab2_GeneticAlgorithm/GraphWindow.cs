@@ -55,7 +55,8 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         private static System.Numerics.Vector4 _minimumGradientColor = new System.Numerics.Vector4(0.0f, 0.0f, 0.5f, 1.0f);
         private static System.Numerics.Vector4 _maximumGradientColor = new System.Numerics.Vector4(0.7f, 0.0f, 0.5f, 1.0f);
 
-        private ControlMode _mode = ControlMode.Setup;
+        private eControlMode _mode = eControlMode.Setup;
+        private static int _renderPrimitive = 1; // 0 - points, 1 - triangles
 
         public GraphWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
@@ -187,12 +188,22 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            //GL.DrawArrays(PrimitiveType.Points, 0, _vertices.Length / 6);
 
-            GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+            switch (_renderPrimitive)
+            {
+                case 0:
+                    GL.DrawArrays(PrimitiveType.Points, 0, _vertices.Length / 6);
+                    break;
+                case 1:
+                    GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+                    break;
+                default:
+                    GL.DrawArrays(PrimitiveType.Points, 0, _vertices.Length / 6);
+                    break;
+            }
 
             ShowImGui();
-            //ImGui.ShowDemoWindow();
+            ImGui.ShowDemoWindow();
 
             _guiController.Render();
             ImGuiController.CheckGLError("End of frame");
@@ -221,7 +232,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                     this.WindowState = WindowState.Normal;
             }
 
-            if (_mode == ControlMode.View)
+            if (_mode == eControlMode.View)
             {
                 const float cameraSpeed = 1.5f;
                 const float sensitivity = 0.2f;
@@ -265,9 +276,9 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         {
             base.OnMouseWheel(e);
 
-            if (_mode == ControlMode.Setup)
+            if (_mode == eControlMode.Setup)
                 _guiController.MouseScroll(e.Offset);
-            else if (_mode == ControlMode.View)
+            else if (_mode == eControlMode.View)
                 _camera.Fov -= e.OffsetY;
         }
 
@@ -302,14 +313,14 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
         private void SwitchControlMode()
         {
-            if (_mode == ControlMode.Setup)
+            if (_mode == eControlMode.Setup)
             {
-                _mode = ControlMode.View;
+                _mode = eControlMode.View;
                 CursorState = CursorState.Grabbed;
             }
-            else if (_mode == ControlMode.View)
+            else if (_mode == eControlMode.View)
             {
-                _mode = ControlMode.Setup;
+                _mode = eControlMode.Setup;
                 CursorState = CursorState.Normal;
             }
         }
@@ -390,7 +401,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             if (no_resize) window_flags |= ImGuiWindowFlags.NoResize;
             if (no_collapse) window_flags |= ImGuiWindowFlags.NoCollapse;
             if (no_nav) window_flags |= ImGuiWindowFlags.NoNav;
-            if (no_background_in_view_mode && _mode == ControlMode.View) window_flags |= ImGuiWindowFlags.NoBackground;
+            if (no_background_in_view_mode && _mode == eControlMode.View) window_flags |= ImGuiWindowFlags.NoBackground;
             if (no_bring_to_front) window_flags |= ImGuiWindowFlags.NoBringToFrontOnFocus;
 
             ImGui.SetNextWindowPos(new System.Numerics.Vector2(3, 3), ImGuiCond.Once);
@@ -493,6 +504,13 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
                     if (ImGui.Button("Rebuild"))
                         Rebuild();
+
+                    ImGui.Spacing();
+
+                    ImGui.Text("Render primitives");
+                    ImGui.RadioButton("Points", ref _renderPrimitive, 0); 
+                    ImGui.SameLine();
+                    ImGui.RadioButton("Triangles", ref _renderPrimitive, 1);
                 }
             }
 

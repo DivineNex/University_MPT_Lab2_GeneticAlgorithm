@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace University_MPT_Lab2_GeneticAlgorithm
 {
-    internal enum ControlMode
+    internal enum eControlMode
     {
         Setup,
         View
