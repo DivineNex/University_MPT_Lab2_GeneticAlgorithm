@@ -216,7 +216,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             if (_showGui)
                 ShowImGui();
-            //ImGui.ShowDemoWindow();
+            ImGui.ShowDemoWindow();
 
             _guiController.Render();
             ImGuiController.CheckGLError("End of frame");
@@ -431,6 +431,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             ImGui.SetNextWindowPos(new System.Numerics.Vector2(3, 3), ImGuiCond.Once);
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(450, ClientSize.Y - 6), ImGuiCond.Once);
 
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 10.0f);
             ImGui.Begin("Genetic Algorithm", window_flags);
 
             ImGui.PushItemWidth(ImGui.GetFontSize() * -12);
@@ -465,9 +466,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 ImGui.Separator();
 
                 if (ImGui.TreeNode("User guide"))
-                {
                     ImGui.ShowUserGuide();
-                }
             }
 
             if (ImGui.CollapsingHeader("Function parameters"))
