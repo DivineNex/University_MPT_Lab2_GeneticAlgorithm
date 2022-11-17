@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys;
@@ -23,7 +24,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         private int _minY;
         private int _maxY;
         private float _step;
-        private List<Point3D> _points;
+        private List<Point3D> _surfacePoints;
         private int _surfaceLength;
         private int _surfaceWidth;
 
@@ -131,7 +132,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             vertices = verticesList.ToArray();
         }
 
-        private void GenerateIndices(int surfaceLenght, int surfaceWidth)
+        private void GenerateIndicesForSurface(int surfaceLenght, int surfaceWidth)
         {
             List<uint> indices = new List<uint>();
             indices.Capacity = (surfaceWidth - 1) * (surfaceWidth - 1) * 6;
@@ -167,6 +168,28 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             //задаем цвет очистки
             GL.ClearColor(0.5f, 0.7f, 0.7f, 1.0f);
 
+            //генерируем буфер VBO и биндим его
+            _vertexBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+
+            //генерируем буфер VAO и биндим его
+            _vertexArrayObject = GL.GenVertexArray();
+            GL.BindVertexArray(_vertexArrayObject);
+
+            //генерируем EBO и биндим его
+            _elementBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
+
+            //создаем указатель на позицию вершин и включаем атрибут
+            var vertexLocation = _shader.GetAttribLocation("aPosition");
+            GL.EnableVertexAttribArray(vertexLocation);
+            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 0);
+
+            //создаем указатель на цвет вершин и включаем атрибут
+            var colorLocation = _shader.GetAttribLocation("aColor");
+            GL.EnableVertexAttribArray(colorLocation);
+            GL.VertexAttribPointer(colorLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 3 * sizeof(float));
+
             _shader.Use();
         }
 
@@ -201,17 +224,13 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-            switch (_renderPrimitive)
+            if (_renderPrimitive == 0) //points
             {
-                case 0:
-                    GL.DrawArrays(PrimitiveType.Points, 0, _vertices.Length / 6);
-                    break;
-                case 1:
-                    GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
-                    break;
-                default:
-                    GL.DrawArrays(PrimitiveType.Points, 0, _vertices.Length / 6);
-                    break;
+                GL.DrawArrays(PrimitiveType.Points, 0, _vertices.Length / 6);
+            }
+            else if (_renderPrimitive == 1) //triangles
+            {
+                GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
             }
 
             if (_showGui)
@@ -358,45 +377,23 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             _step = 0.1f;
             _vertices = new float[0];
             _indices = new uint[0];
-            _points = new List<Point3D>(100000);
+            _surfacePoints = new List<Point3D>(100000);
         }
 
         private void Rebuild()
         {
-            _points = new List<Point3D>(100000);
+            var capacity = ((_maxX - _minX) / Math.Round(_step, 2) + 1) * ((_maxX - _minX) / Math.Round(_step, 2) + 1);
+            _surfacePoints = new List<Point3D>((int)capacity);
             _vertices = new float[0];
             _indices = new uint[0];
 
             CalculatePoints(_minX, _maxX, _minY, _maxY, Math.Round(_step, 2));
-            var normalizedPoints = NormalizePoints(_points);
+            var normalizedPoints = NormalizePoints(_surfacePoints);
             PointsToVertices(normalizedPoints, out _vertices);
-            GenerateIndices(_surfaceLength, _surfaceWidth);
+            GenerateIndicesForSurface(_surfaceLength, _surfaceWidth);
 
-            //генерируем буфер VBO
-            _vertexBufferObject = GL.GenBuffer();
-
-            //биндим буфер VBO и задаем его размер
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
             GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StreamDraw);
-
-            //генерируем буфер VAO и биндим его
-            _vertexArrayObject = GL.GenVertexArray();
-            GL.BindVertexArray(_vertexArrayObject);
-
-            //генерируем EBO и биндим его
-            _elementBufferObject = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
             GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.StreamDraw);
-
-            //создаем указатель на позицию вершин и включаем атрибут
-            var vertexLocation = _shader.GetAttribLocation("aPosition");
-            GL.EnableVertexAttribArray(vertexLocation);
-            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 0);
-
-            //создаем указатель на цвет вершин и включаем атрибут
-            var colorLocation = _shader.GetAttribLocation("aColor");
-            GL.EnableVertexAttribArray(colorLocation);
-            GL.VertexAttribPointer(colorLocation, 3, VertexAttribPointerType.Float, true, 6 * sizeof(float), 3 * sizeof(float));
         }
 
         private void CalculatePoints(double xMin, double xMax,
@@ -408,7 +405,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 {
                     double z = Math.Sin(x) + Math.Cos(y);
                     //double z = Math.Sin(10*(Math.Pow(x,2) + Math.Pow(y,2)))/10;
-                    _points.Add(new Point3D(x, y, z));
+                    _surfacePoints.Add(new Point3D(x, y, z));
                 }
             }
 
