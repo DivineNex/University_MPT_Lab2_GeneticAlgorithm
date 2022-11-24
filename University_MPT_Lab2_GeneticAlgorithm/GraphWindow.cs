@@ -19,6 +19,8 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 {
     internal class GraphWindow : GameWindow
     {
+        private GeneticAlgorithm _geneticAlgorithm;
+
         private int _minX;
         private int _maxX;
         private int _minY;
@@ -66,6 +68,14 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         private Stopwatch _frameStopwatch = new Stopwatch();
         private static bool _rotationByY = true;
         private static bool _showGui = true;
+
+        private double[] _gaValues = new double[2];
+        private double _gaFitness = 0;
+        private double _gaXoverRate = 0.8;
+        private double _gaMutRate = 0.5;
+        private int _gaPopulationSize = 100;
+        private int _gaGenerationSize = 2000;
+        private int _gaChromosomeLength = 2;
 
         public GraphWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
@@ -235,7 +245,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             if (_showGui)
                 ShowImGui();
-            ImGui.ShowDemoWindow();
+            //ImGui.ShowDemoWindow();
 
             _guiController.Render();
             ImGuiController.CheckGLError("End of frame");
@@ -483,7 +493,20 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
             if (ImGui.CollapsingHeader("Genetic algorithm"))
             {
+                ImGui.InputDouble("Crossover rate", ref _gaXoverRate, 0.1);
+                ImGui.InputDouble("Mutation rate", ref _gaMutRate, 0.1);
+                ImGui.InputInt("Population size", ref _gaPopulationSize, 1);
+                ImGui.InputInt("Generation size", ref _gaGenerationSize, 1);
+                ImGui.InputInt("Chromosome length", ref _gaChromosomeLength, 1);
 
+                if (ImGui.Button("Launch GA"))
+                    LaunchGA();
+
+                ImGui.Separator();
+                ImGui.TextColored(new System.Numerics.Vector4(255, 255, 255, 255), "Result:");
+                ImGui.Text($"X-coord = {_gaValues[0]}");
+                ImGui.Text($"Y-coord = {_gaValues[1]}");
+                ImGui.Text($"Value (Z) = {_gaFitness}");
             }
 
             if (ImGui.CollapsingHeader("Settings"))
@@ -568,6 +591,27 @@ namespace University_MPT_Lab2_GeneticAlgorithm
 
                 ImGui.End();
             }
+        }
+
+        private double GAFunction(double[] values)
+        {
+            if (values.GetLength(0) != 2)
+                throw new Exception("should only have 2 args");
+
+            double x = values[0]; 
+            double y = values[1];
+
+            return Math.Sin(x) + Math.Cos(y);
+        }
+
+        private void LaunchGA()
+        {
+            _geneticAlgorithm = new GeneticAlgorithm(0.8, 0.5, 100, 2000, 2);
+            _geneticAlgorithm.FitnessFunction = GAFunction;
+            _geneticAlgorithm.Elitism = true;
+            _geneticAlgorithm.Launch();
+
+            _geneticAlgorithm.GetBestValues(out _gaValues, out _gaFitness);
         }
     }
 }
