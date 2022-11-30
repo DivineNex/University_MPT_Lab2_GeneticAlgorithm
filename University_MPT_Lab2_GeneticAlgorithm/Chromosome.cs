@@ -28,7 +28,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             if (createGenes)
             {
                 for (int i = 0; i < ChromosomeLength; i++)
-                    ChromosomeGenes[i] = rand.NextDouble();
+                    ChromosomeGenes[i] = rand.Next(-10, 10);
             }
         }
 
@@ -38,7 +38,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         //picked position point.
         public void Crossover(ref Chromosome Chromosome2, out Chromosome child1, out Chromosome child2)
         {
-            int position = (int)(rand.NextDouble() * (double)ChromosomeLength);
+            int position = (int)(rand.Next(-10, 10) * (double)ChromosomeLength);
             child1 = new Chromosome(ChromosomeLength, false);
             child2 = new Chromosome(ChromosomeLength, false);
             for (int i = 0; i < ChromosomeLength; i++)
@@ -61,8 +61,8 @@ namespace University_MPT_Lab2_GeneticAlgorithm
         {
             for (int position = 0; position < ChromosomeLength; position++)
             {
-                if (rand.NextDouble() < ChromosomeMutationRate)
-                    ChromosomeGenes[position] = (ChromosomeGenes[position] + rand.NextDouble()) / 2.0;
+                if (rand.Next(-10, 10) < ChromosomeMutationRate)
+                    ChromosomeGenes[position] = (ChromosomeGenes[position] + rand.Next(-10,10)) / 2.0;
             }
         }
 

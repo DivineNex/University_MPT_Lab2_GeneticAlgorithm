@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
@@ -414,6 +415,8 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 for (double y = yMin; y <= yMax; y += step)
                 {
                     double z = Math.Sin(x) + Math.Cos(y);
+                    //var n = 9;
+                    //double z = Math.Pow(15 * x * y * (1 - x) * (1 - y) * Math.Sin(n * Math.PI * x) * Math.Sin(n * Math.PI * y), 2);
                     //double z = Math.Sin(10*(Math.Pow(x,2) + Math.Pow(y,2)))/10;
                     _surfacePoints.Add(new Point3D(x, y, z));
                 }
@@ -565,6 +568,12 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 }
             }
 
+            if (ImGui.CollapsingHeader("Export"))
+            {
+                if (ImGui.Button("Export to STL file"))
+                    ExportToSTL();
+            }
+
             ImGui.End();
 
             if (_metricsShow)
@@ -584,7 +593,7 @@ namespace University_MPT_Lab2_GeneticAlgorithm
                 ImGui.Text($"Average ms/frame = {_lastAverageMs}");
                 ImGui.Text($"Average FPS = {1000 / _lastAverageMs}");
                 ImGui.Separator();
-                ImGui.Text($"Vertices = {_vertices.Length / 2}");
+                ImGui.Text($"Vertices = {_vertices.Length}");
                 ImGui.Text($"Indices = {_indices.Length}");
                 ImGui.Text($"Points = {_vertices.Length / 2 / 3}");
                 ImGui.Text($"Triangles = {_indices.Length / 3}");
@@ -612,6 +621,49 @@ namespace University_MPT_Lab2_GeneticAlgorithm
             _geneticAlgorithm.Launch();
 
             _geneticAlgorithm.GetBestValues(out _gaValues, out _gaFitness);
+        }
+
+        private void ExportToSTL()
+        {
+            using (StreamWriter sw = new StreamWriter($"../../../Export/test.STL"))
+            {
+                sw.WriteLine("solid testName");
+
+                for (int i = 0; i < _indices.Length; i += 3)
+                {
+                    var vert1x = _vertices[6 * _indices[i]];
+                    var vert1y = _vertices[6 * _indices[i] + 1];
+                    var vert1z = _vertices[6 * _indices[i] + 2];
+                    var vert2x = _vertices[6 * _indices[i + 1]];
+                    var vert2y = _vertices[6 * _indices[i + 1] + 1];
+                    var vert2z = _vertices[6 * _indices[i + 1] + 2];
+                    var vert3x = _vertices[6 * _indices[i + 2]];
+                    var vert3y = _vertices[6 * _indices[i + 2] + 1];
+                    var vert3z = _vertices[6 * _indices[i + 2] + 2];
+
+                    var vec1x = vert2x - vert1x;
+                    var vec1y = vert2y - vert1y;
+                    var vec1z = vert2z - vert1z;
+                    var vec2x = vert3x - vert1x;
+                    var vec2y = vert3y - vert1y;
+                    var vec2z = vert3z - vert1z;
+
+                    var normalVectorX = vec1y * vec2z - vec1z * vec2y;
+                    var normalVectorY = vec1x * vec2z - vec1z * vec2x;
+                    var normalVectorZ = vec1x * vec2y - vec1y * vec2x;
+
+                    //y и z поменяны местами специально, учиывая различие систем координат
+                    sw.WriteLine($"   facet normal {normalVectorX} {normalVectorZ} {normalVectorY}");
+                    sw.WriteLine($"      outer loop");
+                    sw.WriteLine($"         vertex {vert1x} {vert1z} {vert1y}");
+                    sw.WriteLine($"         vertex {vert2x} {vert2z} {vert2y}");
+                    sw.WriteLine($"         vertex {vert3x} {vert3z} {vert3y}");
+                    sw.WriteLine($"      endloop");
+                    sw.WriteLine($"   endfacet");
+                }
+
+                sw.WriteLine("endsolid");
+            }
         }
     }
 }
